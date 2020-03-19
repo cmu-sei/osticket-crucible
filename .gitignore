@@ -1,0 +1,26 @@
+.htaccess
+php53.cgi
+include/ost-config.php
+*.sw[a-z]
+.DS_Store
+.vagrant
+Vagrantfile
+
+# Ignore PHP errors
+php_errors.log
+
+# Staging directory used for packaging script
+stage
+
+# Ignore compiled phar files
+*.phar
+plugins
+
+# Ignore installed dependencies and composer if placed here
+lib/
+composer.phar
+composer.lock
+composer.json
+
+# ignore VS Code
+.vscode/
