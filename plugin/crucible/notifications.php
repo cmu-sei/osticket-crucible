@@ -1,17 +1,16 @@
+<?php
 /*
 Crucible Plugin for osTicket
 Copyright 2020 Carnegie Mellon University.
 NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
 Released under a GNU GPL 2.0-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon(R) and CERT(R) are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 1. osTicket Plugins (https://github.com/osTicket/osTicket-plugins/blob/develop/LICENSE) Copyright 2013 Free Software Foundation, Inc..
 2. osticket-rocketchat (https://github.com/tuudik/osticket-rocketchat/blob/master/LICENSE) Copyright 2016 Tuudik, laufhannes, thammanna.
 DM20-0195
  */
-
-<?php
 
 require_once('lib/jumbojett/openid-connect-php/OpenIDConnectClient.php');
 
@@ -243,8 +242,11 @@ class CrucibleNotificationPlugin
 			}
 			$user_time = strtotime($result[0]);
 		}
-
-		if ((time() >= $expiration) || ($user_time > $token_time)) {
+		$token = '';
+		if ($this->config->exists('token')) {
+			$token = $this->config->get('token');
+		}
+		if ((time() >= $expiration) || ($user_time > $token_time) || empty($token)) {
 			// get a new token
 			$oidc = new OpenIDConnectClient($this->config->get('identity-url'),
 			$this->config->get('notify-client-id'),
@@ -255,7 +257,7 @@ class CrucibleNotificationPlugin
 				$oidc->setVerifyPeer(false);
 			}
 
-			$oidc->addScope('email openid profile player');
+			$oidc->addScope($this->config->get('scopes'));
 			$oidc->addAuthParam(array('username'=>$this->config->get('notify-user')));
 			$oidc->addAuthParam(array('password'=>$this->config->get('notify-pass')));
 			$response = $oidc->requestResourceOwnerToken(TRUE);
@@ -284,9 +286,14 @@ class CrucibleNotificationPlugin
 			return;
 		}
 
+		if (!preg_match("/^(\{)?[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}(?(1)\})$/i", $guid)) {
+			$ost->logDebug("sendToUser", $guid . " is not a valid GUID to send a notification", false);
+			return;
+		}
+
 		try {
 			$data_string = utf8_encode(json_encode($payload));
-			$url = $this->config->get('player-api-url') . '/exercises/' . $this->config->get('exercise-guid') . '/users/' . $guid . '/notifications';
+			$url = $this->config->get('player-api-url') . '/' . $this->config->get('player_noun') . '/' . $this->config->get('view-guid') . '/users/' . $guid . '/notifications';
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
@@ -301,7 +308,7 @@ class CrucibleNotificationPlugin
 			} else {
 				$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 				if ($statusCode != '200') {
-					throw new Exception($url . ' Http code: ' . $statusCode);
+					throw new Exception($url . ' Http code: ' . $statusCode . '\n\n  Payload: ' . $data_string . '\n\n authorization: ' . $authorization);
 				}
 			}
 			curl_close($ch);

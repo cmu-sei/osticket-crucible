@@ -1,17 +1,16 @@
+<?php
 /*
 Crucible Plugin for osTicket
 Copyright 2020 Carnegie Mellon University.
 NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
 Released under a GNU GPL 2.0-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon(R) and CERT(R) are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 1. osTicket Plugins (https://github.com/osTicket/osTicket-plugins/blob/develop/LICENSE) Copyright 2013 Free Software Foundation, Inc..
 2. osticket-rocketchat (https://github.com/tuudik/osticket-rocketchat/blob/master/LICENSE) Copyright 2016 Tuudik, laufhannes, thammanna.
 DM20-0195
 */
-
-<?php
 
 class Option {
 
@@ -653,7 +652,7 @@ class PluginBuilder extends Module {
     }
 
     function getComposer() {
-        list($code, $phar) = $this->_http_get('https://getcomposer.org/composer.phar');
+        list($code, $phar) = $this->_http_get('https://getcomposer.org/download/1.10.7/composer.phar');
 
         if (!($fp = fopen(dirname(__file__).'/composer.phar', 'wb')))
             $this->fail('Cannot install composer: Unable to write "composer.phar"');
@@ -675,7 +674,7 @@ class PluginBuilder extends Module {
         // Write composer.json file
         $composer = <<<EOF
 {
-    "name": "osTicket/crucible-plugins",
+    "name": "osticket/crucible-plugins",
     "repositories": [
         {
             "type": "pear",
@@ -684,11 +683,13 @@ class PluginBuilder extends Module {
     ],
     "require": %s,
     "config": {
-        "vendor-dir": "lib"
+        "vendor-dir": "lib",
+        "process-timeout":0
     }
 }
 EOF;
         $composer = sprintf($composer, json_encode($requires));
+        $this->stdout->write($composer . "\n");
 
         if (!($fp = fopen('composer.json', 'w')))
             $this->fail('Unable to save "composer.json"');
@@ -701,10 +702,10 @@ EOF;
         $php = defined('PHP_BINARY') ? PHP_BINARY : 'php';
         if (file_exists(dirname(__file__)."/composer.lock")) {
             if ($autoupdate)
-                passthru($php." ".dirname(__file__)."/composer.phar -v update");
+                passthru($php." ".dirname(__file__)."/composer.phar -vvv update");
         }
         else
-            passthru($php." ".dirname(__file__)."/composer.phar -v install");
+            passthru($php." ".dirname(__file__)."/composer.phar -vvv install");
     }
 }
 $registered_modules = array();
