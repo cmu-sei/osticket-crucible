@@ -1,17 +1,16 @@
+<?php
 /*
 Crucible Plugin for osTicket
 Copyright 2020 Carnegie Mellon University.
 NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
 Released under a GNU GPL 2.0-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon(R) and CERT(R) are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 1. osTicket Plugins (https://github.com/osTicket/osTicket-plugins/blob/develop/LICENSE) Copyright 2013 Free Software Foundation, Inc..
 2. osticket-rocketchat (https://github.com/tuudik/osticket-rocketchat/blob/master/LICENSE) Copyright 2016 Tuudik, laufhannes, thammanna.
 DM20-0195
 */
-
-<?php
 
 use ohmy\Auth2;
 
@@ -51,16 +50,24 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
     }
 
     function triggerAuth() {
+        global $ost;
+
         parent::triggerAuth();
         $identity = $this->identity->triggerAuth();
 
-        // if neither agent nor admin is set, this is a regular user
-        if ((!$this->identity->is_agent) && (!$this->identity->is_admin)) {
-            if (!$_SESSION['_staff']['auth']['msg']) {
-                $_SESSION['_staff']['auth']['msg'] = 'must be agent or admin';
+        try {
+            // if neither agent nor admin is set, this is a regular user
+            if ((!$this->identity->is_agent) && (!$this->identity->is_admin)) {
+                if (!$_SESSION['_staff']['auth']['msg']) {
+                    $_SESSION['_staff']['auth']['msg'] = 'must be agent or admin';
+                }
+            } else if ($this->checkUser()) {
+                $_SESSION[':oauth']['username'] = $this->identity->guid;
             }
-        } else if ($this->checkUser()) {
-            $_SESSION[':oauth']['username'] = $this->identity->guid;
+        }
+        catch (Exception $e) {
+            $ost->logError("triggerAuth - Staff", $e->getMessage(), false);
+            throw $e;
         }
 
         Http::redirect(ROOT_PATH . 'scp/index.php');
@@ -129,6 +136,10 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
                 $staff->lastname = $lastname;
                 $staff->save();
             }
+            if ($this->config->get('identity-email') && (!isset($staff->email) || $this->identity->email != $staff->email)) {
+                $staff->email = $this->identity->email;
+                $staff->save();
+            }
         } else {
             $_SESSION['_staff']['auth']['msg'] = 'could not locate account';
             return false;
@@ -192,6 +203,8 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
             // could not update the account settings
             $_SESSION['_staff']['auth']['msg'] = 'could not update staff account';
             $ost->logError("staff update", print_r($errors, true), false);
+            $ost->logError("staff update - identity", print_r($this->identity, true), false);
+            $ost->logError("staff update - staff", print_r($staff, true), false);
             return false;
         }
 

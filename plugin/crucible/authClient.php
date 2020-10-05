@@ -1,17 +1,16 @@
+<?php
 /*
 Crucible Plugin for osTicket
 Copyright 2020 Carnegie Mellon University.
 NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
 Released under a GNU GPL 2.0-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon(R) and CERT(R) are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 1. osTicket Plugins (https://github.com/osTicket/osTicket-plugins/blob/develop/LICENSE) Copyright 2013 Free Software Foundation, Inc..
 2. osticket-rocketchat (https://github.com/tuudik/osticket-rocketchat/blob/master/LICENSE) Copyright 2016 Tuudik, laufhannes, thammanna.
 DM20-0195
 */
-
-<?php
 
 use ohmy\Auth2;
 
@@ -56,25 +55,33 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
 
     function triggerAuth() {
         require_once INCLUDE_DIR . 'class.json.php';
+        global $ost;
+
         parent::triggerAuth();
         $identity = $this->identity->triggerAuth();
 
-        if (($this->identity->is_agent) || ($this->identity->is_admin)) {
-            Http::redirect(ROOT_PATH . 'scp/login.php?do=ext&bk=identity.staff');
-        } elseif ($this->checkUser()) {
-            // lets first to check whether we need to update this user email and name
-            $_SESSION[':oauth']['name'] = $this->identity->name;
-            $_SESSION[':oauth']['username'] = $this->identity->guid;
+        try {
+            if (($this->identity->is_agent) || ($this->identity->is_admin)) {
+                Http::redirect(ROOT_PATH . 'scp/login.php?do=ext&bk=identity.staff');
+            } elseif ($this->checkUser()) {
+                // lets first to check whether we need to update this user email and name
+                $_SESSION[':oauth']['name'] = $this->identity->name;
+                $_SESSION[':oauth']['username'] = $this->identity->guid;
 
-            //echo "redirect to " . ROOT_PATH . "tickets.php<br>";
-            Http::redirect(ROOT_PATH . 'tickets.php');
-        } else {
-            Http::redirect(ROOT_PATH . 'login.php');
+                //echo "redirect to " . ROOT_PATH . "tickets.php<br>";
+                Http::redirect(ROOT_PATH . 'tickets.php');
+            } else {
+                Http::redirect(ROOT_PATH . 'login.php');
+            }
+        }
+        catch (Exception $e) {
+            $ost->logError("triggerAuth - Client", $e->getMessage(), false);
+            throw $e;
         }
     }
 
     function checkUser() {
-        
+
         $vars = array(
             'name' => $this->identity->name,
             'email' => $this->identity->email,
@@ -105,6 +112,10 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
             // update user name if necessary
             if ($this->identity->name != $user->name) {
                 $user->name = $this->identity->name;
+                $user->save();
+            }
+            if ($this->config->get('identity-email') && (!isset($user->default_email) || $this->identity->email != $user->default_email)) {
+                $user->default_email = $this->identity->email;
                 $user->save();
             }
             // update org if necessary
@@ -148,7 +159,6 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
 
         // determine whether org wants to add collab to all members
         if ($org && $org->autoAddMembersAsCollabs()) {
-            $settings = array('isactive' => true);
 
             // find all tickets for this org
             $tickets = Ticket::objects()->filter(Q::any(array(
@@ -186,13 +196,13 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
 
         foreach ($tickets as $ticketModel) {
             $ticket = Ticket::lookup($ticketModel->getId());
-            if ($ticket->getState() == "open") {
+            if ($ticket->isOpen()) {
                 if (!$ticket->setStatus('closed')) {
                     $ticket->setStatusId(3);
                 }
                 // remove collaborators so they do not reopen the ticket
                 $ticket->getThread()->removeCollaborators();
-            }           
+            }
         }
     }
     

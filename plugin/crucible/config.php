@@ -1,17 +1,16 @@
+<?php
 /*
 Crucible Plugin for osTicket
 Copyright 2020 Carnegie Mellon University.
 NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
 Released under a GNU GPL 2.0-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon(R) and CERT(R) are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 1. osTicket Plugins (https://github.com/osTicket/osTicket-plugins/blob/develop/LICENSE) Copyright 2013 Free Software Foundation, Inc..
 2. osticket-rocketchat (https://github.com/tuudik/osticket-rocketchat/blob/master/LICENSE) Copyright 2016 Tuudik, laufhannes, thammanna.
 DM20-0195
 */
-
-<?php
 
 require_once INCLUDE_DIR . 'class.plugin.php';
 
@@ -34,9 +33,10 @@ class CruciblePluginConfig extends PluginConfig {
 		)),
 		'client-id' => new TextboxField(array(
 			'label' => 'Client ID',
+			'default' => 'osticket',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
-		'client-secret' => new TextboxField(array(
+		'client-secret' => new PasswordField(array(
 			'label' => 'Client Secret',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
@@ -48,13 +48,35 @@ class CruciblePluginConfig extends PluginConfig {
 			'label' => 'Redirect URI',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
+		'scopes' => new TextboxField(array(
+			'label' => 'Identity Scopes',
+			'default' => 'email openid profile player',
+			'configuration' => array('size' => 60, 'length' => 100),
+		)),
 		'enabled' => clone $modes,
+		'identity-email' => new BooleanField(array(
+			'label' => 'Use Identity Email',
+			'configuration' => array('desc' => 'Check to overwrite users osTicket email with Identity email on login'),
+			'default' => true
+		)),
+		'player_noun' => new ChoiceField(array(
+			'label' => 'Player noun to use',
+			'default' => 'views',
+			'choices' =>
+				array(
+					'views' => 'Views',
+					'exercises' => 'Exercises'
+				),
+			'configuration'=>array(
+				'multiselect' => false,
+			),
+		)),
 		// player settings
 		'player' => new SectionBreakField(array(
 			'label' => 'Player and Team Settings',
 		)),
-		'exercise-guid' => new TextboxField(array(
-			'label' => 'Exercise GUID',
+		'view-guid' => new TextboxField(array(
+			'label' => 'View GUID',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
 		'agent-guid-list' => new TextboxField(array(
@@ -99,9 +121,10 @@ class CruciblePluginConfig extends PluginConfig {
 		)),
 		'notify-client-id' => new TextboxField(array(
 			'label' => 'Client ID',
+			'default' => 'osticket.notify',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
-		'notify-client-secret' => new TextboxField(array(
+		'notify-client-secret' => new PasswordField(array(
 			'label' => 'Client Secret',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
@@ -109,7 +132,7 @@ class CruciblePluginConfig extends PluginConfig {
 			'label' => 'Username',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
-		'notify-pass' => new TextboxField(array(
+		'notify-pass' => new PasswordField(array(
 			'label' => 'Password',
 			'configuration' => array('size' => 60, 'length' => 100),
 		)),
@@ -127,6 +150,7 @@ class CruciblePluginConfig extends PluginConfig {
 		)),
 		'text-length' => new TextboxField(array(
 			'label' => 'Text length to show',
+			'default' => '180',
 			'configuration' => array('size' => 20, 'length' => 20),
 		)),
 		'notify' => new BooleanField(array(

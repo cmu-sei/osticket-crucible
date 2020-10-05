@@ -1,14 +1,13 @@
+<?php
 /*
 Crucible
 Copyright 2020 Carnegie Mellon University.
 NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
 Released under a MIT (SEI)-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon(R) and CERT(R) are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 DM20-0181
 */
-
-<?php
 
 require_once('lib/jumbojett/openid-connect-php/OpenIDConnectClient.php');
 
@@ -44,12 +43,12 @@ class Auth {
         }
 
         $oidc->setRedirectURL($this->config->get('redirect-uri'));
-        $oidc->addScope('email openid profile player');
+        $oidc->addScope($this->config->get('scopes'));
+
         try {
             $oidc->authenticate();
         } catch (Exception $e) {
-            $ost->logError("oidc error", $e->getMessage(), false);
-            $ost->logError("login error", "Error communicating with identity server", false);
+            $ost->logError('oidc error calling $oidc->authenticate()', $e->getMessage() . "\n\n" . $e->getTraceAsString(), false);
             $this->sendErrorPage();
         }
 
@@ -160,9 +159,9 @@ class Auth {
         }
         $authorization = "Authorization: Bearer " . $this->access_token;
 
-        // get users teams in the configured exercise
-        $url = $this->config->get('player-api-url') . '/me/exercises/' .
-                $this->config->get('exercise-guid') . '/teams';
+        // get users teams in the configured View
+        $url = $this->config->get('player-api-url') . '/me/' . $this->config->get('player_noun') . '/' .
+                $this->config->get('view-guid') . '/teams';
         $curl = curl_init($url);
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
@@ -181,7 +180,8 @@ class Auth {
         curl_close($curl);
 
         if (null === ($teams = json_decode($response))) {
-            $ost->logError("login error", "null json response", false);
+            $ost->logError("getTeams error:  null json response.  URL:  ", print_r($url, true), false);
+            $ost->logError("getTeams error:  null json response.  Header:  ", print_r($authorization, true), false);
             return false;
         }
         if (count($teams) == 0) {

@@ -65,7 +65,7 @@ Identity Server URL:
 
 Redirect URI:  
 
-Exercise GUID: 
+View GUID: 
 
 Agent GUID List: 
 
