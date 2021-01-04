@@ -1,5 +1,5 @@
 Crucible Plugin for osTicket
-Copyright 2020 Carnegie Mellon University.
+Copyright 2021 Carnegie Mellon University.
 GNU GPL 2.0
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 Everyone is permitted to copy and distribute verbatim copies
