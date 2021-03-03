@@ -2,7 +2,9 @@ Crucible plugin for osTicket
 =========================
 
 Crucible plugin for osTicket-1.8 and onward.
+
 This repo is based on GPL2 licensed code from https://github.com/tuudik/osticket-rocketchat and modified to work with Crucible's Player application.
+
 This repo is also based on MIT licensed code from `https://github.com/osTicket/osTicket-plugins`.
 
 Preparing Project
