@@ -1,33 +1,28 @@
 Crucible plugin for osTicket
 =========================
 
-Crucible plugin for osTicket-1.8 and onward
-This repo is based on GPL2 licensed code from https://github.com/tuudik/osticket-rocketchat and modified to work with Crucible.Player.API.
-This repo is also based on MIT licensed code from `https://github.com/osTicket/osTicket-plugins`
+Crucible plugin for osTicket-1.8 and onward.
+This repo is based on GPL2 licensed code from https://github.com/tuudik/osticket-rocketchat and modified to work with Crucible's Player application.
+This repo is also based on MIT licensed code from `https://github.com/osTicket/osTicket-plugins`.
 
 Preparing Project
 =================
 
-Clone this repo or download the zip file and place the contents into your
-`include/plugins` folder
+Clone this repo or download the zip file and place the contents into your `include/plugins` folder.
 
-After cloning, `hydrate` the repo by downloading the third-party library
-dependencies. Note: you should be disconnected from the VPN for this command.
+After cloning, `hydrate` the repo by downloading the third-party library dependencies. Note: you should be disconnected from the VPN for this command.
 
     php make.php hydrate
 
 
 Building Plugins
 ================
-Make any necessary additions or edits to plugins and build PHAR files with
-the `make.php` command
+Make any necessary additions or edits to plugins and build PHAR files with the `make.php` command
 
     php -d phar.readonly=0 make.php build crucible
 
 
-This will compile a PHAR file for the plugin directory. The PHAR will be
-named `crucible.phar` and can be dropped into the osTicket `plugins/` folder
-directly.
+This will compile a PHAR file for the plugin directory. The PHAR will be named `crucible.phar` and can be dropped into the osTicket `plugins/` folder directly.
 
     cp crucible.phar ../
 
