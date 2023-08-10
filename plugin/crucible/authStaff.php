@@ -52,7 +52,8 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
                     $_SESSION['_staff']['auth']['msg'] = 'must be agent or admin';
                 }
             } else if ($this->checkUser()) {
-                $_SESSION[':oauth']['username'] = $this->identity->guid;
+                //$_SESSION[':oauth']['username'] = $this->identity->guid;
+                $_SESSION[':oauth']['username'] = $this->identity->username;
             }
         }
         catch (Exception $e) {
@@ -77,7 +78,8 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
                 $firstname = $parts[0];
             } else {
                 // if no email field, use the id guid
-                $firstname = $this->identity->guid;
+                #$firstname = $this->identity->guid;
+                $firstname = $this->identity->username;
             }
         }
         // last name is a space, because it is required, but doesn't get displayed
@@ -90,7 +92,8 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
             'auto_refresh_rate' => "1", // 1 minute
             'firstname' => $firstname,
             'lastname' => $lastname,
-            'username' => $this->identity->guid,
+            #'username' => $this->identity->guid,
+            'username' => $this->identity->username,
             'dept_id' => $ost->getConfig()->getDefaultDeptId(),
             'role_id' => "1" // agent, not admin
         );
@@ -104,7 +107,8 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
         // }
 
         // lookup staff user account
-        $staff_id = Staff::getIdByUsername($this->identity->guid);
+        //$staff_id = Staff::getIdByUsername($this->identity->guid);
+        $staff_id = Staff::getIdByUsername($this->identity->username);
         if (!$staff_id) {
             // we need to create the user
             if (!$this->createUser($vars)) {
@@ -113,7 +117,8 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
         }
 
         // lookup staff user account
-        $objects = Staff::objects()->filter(array('username' => $this->identity->guid));
+        //$objects = Staff::objects()->filter(array('username' => $this->identity->guid));
+        $objects = Staff::objects()->filter(array('username' => $this->identity->username));
         if (count($objects) == 1) {
             $staff = $objects[0];
             // set access

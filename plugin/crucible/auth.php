@@ -21,6 +21,7 @@ class Auth {
     var $teams;
     var $org_id;
     var $guid;
+    var $username;
     var $email;
     var $name;
 
@@ -134,16 +135,18 @@ class Auth {
     }
 
     function getUserInfo($payload) {
-
+//var_dump($payload);
         $this->guid = $payload->sub;
         $this->name = $payload->name;
+	$this->username = $payload->username;
 
         if ($payload->email) {
             $this->email = $payload->email;
         }
 
         if (!$this->email) {
-            $this->email = "$guid@localhost";
+            //$this->email = "$guid@localhost";
+            $this->email = $payload->username . "@localhost";
         }
 
         return true;

@@ -48,7 +48,7 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
         global $ost;
 
         parent::triggerAuth();
-        $identity = $this->identity->triggerAuth();
+        $this->identity->triggerAuth();
 
         try {
             if (($this->identity->is_agent) || ($this->identity->is_admin)) {
@@ -56,7 +56,11 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
             } elseif ($this->checkUser()) {
                 // lets first to check whether we need to update this user email and name
                 $_SESSION[':oauth']['name'] = $this->identity->name;
-                $_SESSION[':oauth']['username'] = $this->identity->guid;
+                //$_SESSION[':oauth']['username'] = $this->identity->guid;
+                $_SESSION[':oauth']['username'] = $this->identity->username;
+//var_dump($this->identity);
+		//$_SESSION['_auth'] = array ();
+                //var_dump($_SESSION['_auth']);
 
                 //echo "redirect to " . ROOT_PATH . "tickets.php<br>";
                 Http::redirect(ROOT_PATH . 'tickets.php');
@@ -75,7 +79,8 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
         $vars = array(
             'name' => $this->identity->name,
             'email' => $this->identity->email,
-            'username' => $this->identity->guid,
+            //'username' => $this->identity->guid,
+            'username' => $this->identity->username,
             'org_id' => $this->identity->org_id,
             'backend' => "identity.client",
             'sendemail' => "false"
@@ -91,25 +96,35 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
         //     Http::redirect(ROOT_PATH . 'scp/login.php?do=ext&bk=identity.staff');
         //     //return false;
         // }
+	//var_dump($this->identity->guid);
 
         // lookup user account
-        $account = UserAccount::lookupByUsername($this->identity->guid);
+        $account = UserAccount::lookupByUsername($this->identity->username);
         if (!$account) {
+//echo "creating accoutn for this user";
             // we need to create the user
             return $this->createUser($vars);
         } else {
+//echo "found user<br>";
             $user = $account->getUser();
+//var_dump($account);
+//echo "<br><br>";
+//var_dump($user);
+//echo "<br><br>";
             // update user name if necessary
             if ($this->identity->name != $user->name) {
+echo "update name<br>";
                 $user->name = $this->identity->name;
                 $user->save();
             }
             if ($this->config->get('identity-email') && (!isset($user->default_email) || $this->identity->email != $user->default_email)) {
+echo "update email<br>";
                 $user->default_email = $this->identity->email;
                 $user->save();
             }
             // update org if necessary
             if ($this->config->get('update-org') && $user->getOrgId() != $this->identity->org_id) {
+echo "update org<br>";
                     if ($this->config->get('remove-collabs')) {
                     // remove user from old ticket thread collaborators
                     $this->removeUserAsCollaborator($user->getId(), $user->getOrgId());
@@ -198,7 +213,6 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
     
     function createUser($vars) {
         global $ost;
-
         // create user
         $user = User::fromVars($vars, true, false);
         if (!$user) {
@@ -206,7 +220,6 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
             $ost->logError("user creation", "user creation failed for " . $this->name, false);
             return false;
         }
-
         if ($this->config->get('add-collabs')) {
             $this->addUserAsCollaborator($user, $user->getOrganization());
         }
@@ -217,6 +230,7 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
             // we need to register
             return $this->registerUser($user, $vars);
         }
+
         // account already existed?
         return false;
     }
