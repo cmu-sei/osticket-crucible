@@ -32,23 +32,33 @@ This will compile a PHAR file for the plugin directory. The PHAR will be named `
 Installing Plugin
 =======================
 Copy the sign in button image to the `assets` directory of osTicket.
+```
     mkdir -p ../../../assets/oauth/images/
     cp resources/sketch.gif ../../../assets/oauth/images/
+```
 
 Copy the preferred logos to replace the defaults:
+```
     cp resources/Software_Engineering_Institute_Unitmark_Red_and_Black.png ../../../scp/images/ost-logo.png
     cp resources/Software_Engineering_Institute_Unitmark_White.png ../../../assets/default/images/logo.png
+``
 
 Conguring SSL
 =======================
 Create a PEM certificte bundle valid for your site.
+```
     cat my-ca-root.pem > bundle.pem; cat my-intermediate.pem >> certs/bundle.pem
+```
 
 Copy the CA certificates into /etc/ssl/certs:
+```
     cp certs/bundle.pem /etc/ssl/certs/certs/bundle.pem
+```
 
 Update php.ini to point to the certs:
+```
     echo curl.cainfo="/etc/ssl/certs/certs/bundle.pem" > /etc/php.ini
+```
 
 If you do not have the CA certificates, select the Ignore SSL Errors option in the plugin config.
 
@@ -93,4 +103,4 @@ Include the reasons why you're requesting the new feature and how it might benef
 
 ## License
 
-Copyright 2021 Carnegie Mellon University. See the [LICENSE.md](./LICENSE.md) files for details.
+Copyright 2023 Carnegie Mellon University. See the [LICENSE.md](./LICENSE.md) files for details.
