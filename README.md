@@ -41,7 +41,7 @@ Copy the preferred logos to replace the defaults:
 ```
     cp resources/Software_Engineering_Institute_Unitmark_Red_and_Black.png ../../../scp/images/ost-logo.png
     cp resources/Software_Engineering_Institute_Unitmark_White.png ../../../assets/default/images/logo.png
-``
+```
 
 Conguring SSL
 =======================
