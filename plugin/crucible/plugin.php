@@ -4,7 +4,7 @@
 
 return array(
     'id' =>             'osticket:crucible',
-    'version' =>        '0.1',
+    'version' =>        '1.1.0',
     'name' =>           'Oauth2 Authentication and Notifications',
     'author' =>         'Carnegie Mellon University',
     'description' =>    'Provides a configurable authentication backend
