@@ -1,7 +1,7 @@
 Crucible plugin for osTicket
 =========================
 
-Crucible plugin for osTicket-1.8 and onward.
+Crucible plugin for osTicket-1.18 and onward.
 
 This repo is based on GPL2 licensed code from https://github.com/tuudik/osticket-rocketchat and modified to work with Crucible's Player application.
 
@@ -16,6 +16,7 @@ After cloning, `hydrate` the repo by downloading the third-party library depende
 
     php make.php hydrate
 
+With the source code for the plugin installed into the include/plugins folder, you may develop the code live. For production environment, build and install the plugin as indicated below.
 
 Building Plugins
 ================
@@ -55,23 +56,14 @@ If you do not have the CA certificates, select the Ignore SSL Errors option in t
 Configuring the Plugin
 ========================
 Client ID: 
-
 Client Secret: 
-
 Identity Server URL: 
-
 Redirect URI:  
-
 View GUID: 
-
 Agent GUID List: 
-
 Admin GUID List:
-
 Player API URL: 
-
 Authentication: 
-
 Ignore SSL Errors: 
 
 
@@ -86,6 +78,8 @@ CORS Uri				- https://localhost
 Redirect Uri				- https://localhost/api/auth/ext
 Front Channel Logut Uri 		- https://localhost/logout.php
 Granted Application Access		- player
+
+From notification to work, an additional client with `password` grant must be created and a user account with player ViewAdmin permissions must be created.
 
 ## Reporting bugs and requesting features
 

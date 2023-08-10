@@ -17,7 +17,7 @@ Features
 
 Info
 ------
-This plugin uses CURL and tested on osTicket-v1.8 (19292ad).
+This plugin uses CURL and tested on osTicket-v1.18.
 
 Forked from
 ------
