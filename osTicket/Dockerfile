@@ -1,5 +1,5 @@
 #Build Plugin Stage
-FROM campbellsoftwaresolutions/osticket:1.12 as build
+FROM devinsolutions/osticket:1.17 as build
 
 RUN apk add --no-cache --update bash
 
@@ -12,7 +12,7 @@ COPY plugin/ .
 RUN php -dphar.readonly=0 make.php build crucible && mv crucible.phar /tmp/osticket-plugin.phar
 
 # osTicket Image
-FROM campbellsoftwaresolutions/osticket:1.12 as prod
+FROM devinsolutions/osticket:1.17 as prod
 COPY --from=build /tmp/osticket-plugin.phar /tmp/osticket-plugin.phar
 
 # Remove SAMEORIGIN from header requirements
