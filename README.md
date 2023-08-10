@@ -55,31 +55,31 @@ If you do not have the CA certificates, select the Ignore SSL Errors option in t
 
 Configuring the Plugin
 ========================
-Client ID: 
-Client Secret: 
-Identity Server URL: 
-Redirect URI:  
-View GUID: 
-Agent GUID List: 
-Admin GUID List:
-Player API URL: 
-Authentication: 
-Ignore SSL Errors: 
+* Client ID: 
+* Client Secret: 
+* Identity Server URL: 
+* Redirect URI:  
+* View GUID: 
+* Agent GUID List: 
+* Admin GUID List:
+* Player API URL: 
+* Authentication: 
+* Ignore SSL Errors: 
 
 
 Notes
 ========================
 The GUID Lists above can be a comma separated list of team GUIDs.
 
-The identity server must have the client configured with the following options
-Always Include User Claims in Id Token	- selected
-Authorization Code Grant Flow		- selected
-CORS Uri				- https://localhost
-Redirect Uri				- https://localhost/api/auth/ext
-Front Channel Logut Uri 		- https://localhost/logout.php
-Granted Application Access		- player
+The identity server must have the client configured with the following options:
+* Always Include User Claims in Id Token	- selected
+* Authorization Code Grant Flow		- selected
+* CORS Uri				- https://localhost
+* Redirect Uri				- https://localhost/api/auth/ext
+* Front Channel Logut Uri 		- https://localhost/logout.php
+* Granted Application Access		- player
 
-From notification to work, an additional client with `password` grant must be created and a user account with player ViewAdmin permissions must be created.
+From notification to work, an additional client with `password` grant must be created and a user account with Player `ViewAdmin` permissions must be created.
 
 ## Reporting bugs and requesting features
 
