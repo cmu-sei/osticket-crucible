@@ -13,9 +13,15 @@ class StaffAuthBackend extends ExternalStaffAuthenticationBackend {
 
     var $config;
 
+    function getServiceName() {
+        return $this->service_name;
+    }
+
     function __construct($config) {
         $this->config = $config;
-        $this->identity= new Auth($config);
+        $pluginInstance = $this->config->getInstance();
+        $this->service_name = $pluginInstance->name;
+        $this->identity = new Auth($config);
     }
 
     function signOn() {

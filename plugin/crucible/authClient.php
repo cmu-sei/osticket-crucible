@@ -6,13 +6,19 @@ use ohmy\Auth2;
 
 class ClientAuthBackend extends ExternalUserAuthenticationBackend {
     static $id = "identity.client";
-    static $name = "Identity";
+    static $name = "Identity Client";
 
     static $sign_in_image_url = ROOT_PATH . "assets/oauth/images/sketch.gif";
     static $service_name = "Identity";
 
+    function getServiceName() {
+        return $this->service_name;
+    }
+
     function __construct($config) {
         $this->config = $config;
+        $pluginInstance = $this->config->getInstance();
+    	$this->service_name = $pluginInstance->name;
         $this->identity = new Auth($config);
     }
 
@@ -58,7 +64,7 @@ class ClientAuthBackend extends ExternalUserAuthenticationBackend {
                 $_SESSION[':oauth']['name'] = $this->identity->name;
                 //$_SESSION[':oauth']['username'] = $this->identity->guid;
                 $_SESSION[':oauth']['username'] = $this->identity->username;
-//var_dump($this->identity);
+		//var_dump($this->identity);
 		//$_SESSION['_auth'] = array ();
                 //var_dump($_SESSION['_auth']);
 

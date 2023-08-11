@@ -167,9 +167,7 @@ class Auth {
 
         if ($payload->email) {
             $this->email = $payload->email;
-        }
-
-        if (!$this->email) {
+	} else {
             //$this->email = "$guid@localhost";
             $this->email = $payload->username . "@localhost";
         }
