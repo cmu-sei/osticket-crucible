@@ -56,6 +56,8 @@ class Auth {
         $self->access_token = $oidc->getAccessToken();
 
         $this->getUserInfo($oidc->getVerifiedClaims());
+        //echo "<br><br>";
+        //$this->getUserInfo($oidc->requestUserInfo());
 
         if (!$this->getTeams()) {
             $ost->logError("login error", "error communicating with player api", false);
@@ -82,7 +84,7 @@ class Auth {
                         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#myNavbar">
                             <span class="icon-bar white"></span>
                             <span class="icon-bar white"></span>
-                            <span class="icon-bar white"></span> 
+                            <span class="icon-bar white"></span>
                     </button>
                         <a class="navbar-left" href="' . ROOT_PATH . 'index.php" title="Support Center">
                             <img class="img-responsive" src="' . ROOT_PATH . 'logo.php" border=0 alt="Help Desk">
@@ -101,7 +103,7 @@ class Auth {
 
             <div class="clearfix"></div>
             <div class="container">
-                <div class="row"> 
+                <div class="row">
                     <div class="col-md-12">
                             <!--End of header-->
                         <div class="row">
@@ -120,12 +122,12 @@ class Auth {
                 </div>
             </div>
         </div>
-        <div class="footer"> 
+        <div class="footer">
             <div class="company">
                 Copyright &copy; 2018 Carnegie Mellon University - All rights reserved.
             </div>
             <div class="poweredBy col-md-offset-10 col-xs-offset-6"">
-                Powered by					<a href="http://www.osticket.com" target="_blank"> <img alt="osTicket" src="' . ROOT_PATH . 'scp/images/osticket-grey.png" class="osticket-logo"> </a>
+                Powered by                                        <a href="http://www.osticket.com" target="_blank"> <img alt="osTicket" src="' . ROOT_PATH . 'scp/images/osticket-grey.png" class="osticket-logo"> </a>
             </div>
         </div>
         </body>
@@ -135,10 +137,33 @@ class Auth {
     }
 
     function getUserInfo($payload) {
-//var_dump($payload);
+        //var_dump($payload);
         $this->guid = $payload->sub;
-        $this->name = $payload->name;
-	$this->username = $payload->username;
+        if ($payload->name) {
+                   $this->name = $payload->name;
+        } else if ($payload->fullname) {
+            $this->name = $payload->fullname;
+        } else if ($payload->given_name  && $payload->family_name) {
+            $this->name = $payload_name . " " . $payload->family_name;
+            // TODO handle whne just one of them is set
+            echo "determined name to be: " . $this->name;
+        } else {
+            // TODO send error
+            echo "cannot determine name<br>";
+            $ost->logError('oidc error', "cannot determine name", false);
+            $this->sendErrorPage();
+        }
+
+        if ($payload->preferred_username) {
+            $this->username = $payload->preferred_username;
+        } else if ($payload->username) {
+                $this->username = $payload->username;
+        } else {
+            // TODO send error
+            echo "cannot determine username<br>";
+            $ost->logError('oidc error', "cannot determine username", false);
+            $this->sendErrorPage();
+        }
 
         if ($payload->email) {
             $this->email = $payload->email;
